@@ -127,7 +127,6 @@ module.exports = async function(deployer, network, accounts) {
 		synthetixState.address,
 		rewardEscrow.address,
 		ZERO_ADDRESS,
-		web3.utils.toWei('0.0015', 'ether'), // TODO must change this to 0 to match MAINNET after tests are updated
 		web3.utils.toWei('0.0030', 'ether'),
 		{ from: deployerAccount }
 	);
@@ -249,6 +248,12 @@ module.exports = async function(deployer, network, accounts) {
 	await rewardsDistribution.setAuthority(synthetix.address, { from: owner });
 	await rewardsDistribution.setSynthetixProxy(synthetixProxy.address, { from: owner });
 
+	// ----------------------
+	// Setup Gas Price Limit
+	// ----------------------
+	const gasLimit = web3.utils.toWei('25', 'gwei');
+	await synthetix.setGasPriceLimit(gasLimit, { from: oracle });
+
 	// ----------------
 	// Synths
 	// ----------------
@@ -275,12 +280,13 @@ module.exports = async function(deployer, network, accounts) {
 			Synth,
 			proxy.address,
 			tokenState.address,
-			synthetix.address,
-			feePool.address,
+			synthetixProxy.address,
+			feePoolProxy.address,
 			`Synth ${currencyKey}`,
 			currencyKey,
 			owner,
 			web3.utils.asciiToHex(currencyKey),
+			web3.utils.toWei('0'),
 			{ from: deployerAccount }
 		);
 
